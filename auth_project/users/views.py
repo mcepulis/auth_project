@@ -1,12 +1,13 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.http import JsonResponse
 
+User = get_user_model()
 @api_view(['POST'])
 def register(request):
     username = request.data.get('username')
@@ -33,15 +34,16 @@ def login(request):
         return Response({"error": "Invalid credentials"}, status=400)
 
     refresh = RefreshToken.for_user(user)
-
+    access_token = str(refresh.access_token) 
+    print(f"Access token: {access_token}")
     response = JsonResponse({"message": "Login successful"})
     response.set_cookie(
         key="access_token",
         value=str(refresh.access_token),
         httponly=True,
-        samesite="Lax",
+        samesite="None",
         secure=True, 
-        max_age=3600
+        max_age=6
     )
     return response
 
@@ -51,13 +53,6 @@ def logout(request):
     response = Response({"message": "Logged out"})
     response.delete_cookie("access_token")
     return response
-
-from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes
-from django.contrib.auth.models import User
 
 
 @api_view(['GET'])

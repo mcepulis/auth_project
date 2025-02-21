@@ -6,8 +6,14 @@ export default function Dashboard() {
 
   useEffect(() => {
     axios.get("http://127.0.0.1:8000/api/user/", { withCredentials: true })
-      .then((res) => setUsername(res.data.username))
-      .catch(() => setUsername("Guest"));
+      .then((res) => {
+        console.log("User data:", res.data); 
+        setUsername(res.data.username);
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error);  
+        setUsername("Guest");
+      });
   }, []);
 
   return <h2>Logged in as: {username}</h2>;
